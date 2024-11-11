@@ -1,0 +1,1 @@
+- DrawingPanel Modified to run at 60fps.
