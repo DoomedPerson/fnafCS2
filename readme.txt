@@ -1,1 +1,2 @@
 - DrawingPanel Modified to run at 60fps.
+- MazeGenerator spits our unsolvable mazes at the current time while I modify it to work properly here. Once it works, modifications to allow for multiple paths and centering the maze solutions can be done.
