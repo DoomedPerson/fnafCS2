@@ -19,6 +19,8 @@ public class MazeGenerator {
     int DEADM = 0x1000; // 1000000000
     int PATHD = 0x2000; // 1000000000
     int DEADD = 0x4000; // 1000000000
+
+    int last = 1;
     
     int width, height;
     boolean mazeComplete = false;
@@ -106,9 +108,19 @@ public class MazeGenerator {
                 } else {
                     grid[y][x] |= dir;
                     grid[y][x] |= opposite.get(dir);
+
+                    grid[y][x] |= dir;
+                    grid[y][x] |= opposite.get(dir);
+                    grid[y][x] |= opposite.get(direction(x, y, nx, ny));
+
+                    grid[y][x] &= ~opposite.get(last);
+
+                    grid[y][x] &= ~direction(x, y, nx, ny);
                 }
+
+                last = direction(x, y, nx, ny);
                 
-                mark(nx, ny, grid, direction(x, y, nx, ny));
+                mark(nx, ny, grid, last);
             }
 
 
