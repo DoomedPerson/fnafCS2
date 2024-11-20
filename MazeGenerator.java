@@ -19,6 +19,7 @@ public class MazeGenerator {
     int DEADM = 0x1000; // 1000000000
     int PATHD = 0x2000; // 1000000000
     int DEADD = 0x4000; // 1000000000
+    int aiPresent = 0x8000; // 1000000000
 
     int last = 1;
     
@@ -29,15 +30,81 @@ public class MazeGenerator {
     int startEndDistance = 0;
     int creationSteps = 0;
 
+    int pathstepsD = 0;
+
     Map<Integer, Integer> opposite = Map.of(E, W, W, E, N, S, S, N);
     List<Map.Entry<Integer, Integer>> frontier = new ArrayList<>();
     List<Integer> lastMove = new ArrayList<>();
     List<Map.Entry<Integer, Integer>> lastPath = new ArrayList<>();
 
+    List<Map.Entry<Integer, Integer>> lastPathD = new ArrayList<>();
+
     Random rand = new Random();
     Map.Entry<Integer, Integer> start, end, current;
 
     int[][] grid = new int[height][width];
+
+    ArrayList<Map.Entry<Integer, Integer>> finishedPath = new ArrayList<>(); // Completed path from start to finish
+
+
+
+    public List<Map.Entry<Integer, Integer>> unvisited_neighborsDumb(int x, int y) {
+        List<Map.Entry<Integer, Integer>> result = new ArrayList<>();
+
+        if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0) {
+            result.add(new AbstractMap.SimpleEntry<>(x - 1, y)); // Left
+        }
+        if (x + 1 < width && (grid[y][x + 1] & PATHD) == 0 && (grid[y][x] & E) == 0) {
+            result.add(new AbstractMap.SimpleEntry<>(x + 1, y)); // Right
+        }
+        if (y > 0 && (grid[y - 1][x] & PATHD) == 0 && (grid[y][x] & N) == 0) {
+            result.add(new AbstractMap.SimpleEntry<>(x, y - 1)); // Up
+        }
+        if (y + 1 < height && (grid[y + 1][x] & PATHD) == 0 && (grid[y][x] & S) == 0) {
+            result.add(new AbstractMap.SimpleEntry<>(x, y + 1)); // Down
+        }
+
+        return result;
+    }
+    public Map.Entry<Integer, Integer> depthFirstSearch(int x, int y) {
+        // Start DFS from the starting point
+        lastPathD.add(start);
+
+        while (!lastPathD.isEmpty()) {
+            Map.Entry<Integer, Integer> current = lastPathD.get(lastPathD.size() - 1);
+            x = current.getKey();
+            y = current.getValue();
+
+            // Get neighbors of the current position
+            List<Map.Entry<Integer, Integer>> neighbors = unvisited_neighborsDumb(x, y);
+
+            if (!neighbors.isEmpty()) {
+                // Continue DFS: pick a random neighbor and move there
+                Map.Entry<Integer, Integer> next = neighbors.get(rand.nextInt(neighbors.size()));
+                int nx = next.getKey();
+                int ny = next.getValue();
+
+                // Mark the path
+                grid[ny][nx] |= PATHD;
+
+                // Add the new position to the path stack
+                lastPathD.add(next);
+
+                // If we reached the finish, store the path and return the finish
+                if (next.equals(Map.entry(width/2,height/2))) {
+                    // Copy the current path into finishedPath
+                    finishedPath = new ArrayList<>(lastPathD);
+                    return next; // Finish found, return the last position
+                }
+            } else {
+                // No unvisited neighbors, backtrack
+                lastPathD.remove(lastPathD.size() - 1); // Pop the stack
+                grid[y][x] |= DEAD;  // Mark the current cell as dead
+            }
+        }
+
+        return null; // If no path found
+    }
 
     public MazeGenerator(int width, int height) {
         this.width = width;
@@ -50,10 +117,20 @@ public class MazeGenerator {
         Random random = new Random();
 
         // Generate random x and y within bounds
-        int x = random.nextInt(width);
-        int y = random.nextInt(height);
+        int x = width/2;
+        int y = height/2;
 
         mark(x, y, grid, 0);
+
+        if (!startFound) {
+            startFound = true;
+            start = Map.entry(rand.nextInt(width - 1), rand.nextInt(height - 1));
+
+            current = Map.entry(x, y);
+            lastPathD.add(current);
+            lastPath.add(current);
+            grid[y][x] |= START;
+        }
     
         // Call the generateMaze method with the initialized grid
         generateMaze(this.grid);
@@ -103,19 +180,20 @@ public class MazeGenerator {
 
                 int dir = wallDir(x, y, nx, ny);
                 if (backtrack) {
-                    grid[y][x] &= ~direction(x, y, nx, ny);
+                    //grid[y][x] &= ~direction(x, y, nx, ny);
                     backtrack = false;
                 } else {
-                    grid[y][x] |= dir;
-                    grid[y][x] |= opposite.get(dir);
 
-                    grid[y][x] |= dir;
-                    grid[y][x] |= opposite.get(dir);
-                    grid[y][x] |= opposite.get(direction(x, y, nx, ny));
+                    //grid[y][x] |= dir;
+                    //grid[y][x] |= opposite.get(dir);
+                    //grid[y][x] |= opposite.get(direction(x, y, nx, ny));
 
-                    grid[y][x] &= ~opposite.get(last);
+                    //grid[y][x] &= ~opposite.get(last);
 
-                    grid[y][x] &= ~direction(x, y, nx, ny);
+                    //grid[y][x] &= ~direction(x, y, nx, ny);
+
+                    //grid[ny][nx] &= ~opposite.get(dir);
+
                 }
 
                 last = direction(x, y, nx, ny);
@@ -125,10 +203,34 @@ public class MazeGenerator {
 
 
             if (frontier.isEmpty()) {
-                grid[end.getValue()][end.getKey()] |= END;
+                grid[width/2][height/2] |= END;
                 mazeComplete = true;
             }
         }
+    }
+
+    public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y)
+    {
+        boolean searching = true;
+        while (searching == true) {
+            current = depthFirstSearch(x, y);
+
+
+
+        
+                    // Check if we reached the end
+            if (checkEnd(current)) {
+                searching = false;  // Stop the search
+            }
+        }
+
+        return finishedPath;
+
+    }
+
+    public boolean checkEnd(Map.Entry<Integer,Integer> curr)
+    {
+        return (curr.getKey() == width/2 && curr.getValue() == height/2);
     }
 
     private void mark(int x, int y, int[][] grid, int last) {
