@@ -9,8 +9,10 @@ public class Player implements KeyListener {
     public static int door2closed = 0;
     public static int door3closed = 0;
     public static int door4closed = 0;
+
     // This keeps track of the power, if it is zero, normal gameplay stops, and you will enter a power out scene
     public static double actPower = 100.0;
+
     // This is the power that is displayed to the player. It should be rounded down to the nearest ones place
     // so the player will usually have more power than they think they have
     public static double disPower = 100;
@@ -21,7 +23,7 @@ public class Player implements KeyListener {
         actPower -= (door1closed + door2closed + door3closed + door4closed) / 4;
         disPower = (actPower / 1);
     }
-
+// Handles key presses
     @Override
     public void keyPressed(KeyEvent e) {
     int keyCode = e.getKeyCode(); // reminds me of Lua
@@ -59,13 +61,18 @@ public class Player implements KeyListener {
             break;
     }
 }
+
+// Not used (for now)
 public void keyReleased(KeyEvent e) {
     // Can I have $5
 }
+
+// Not used for now
 public void keyTyped(KeyEvent e) {
 // im sure we could specify what functions we want to import, but the way I
 // did it really wants me to override this function so.
 }
+
     public static void main(String[] args) {
         // The player will be able to press buttons to toggle the door closing
         // Every second the usage will be subtracting from your actual power, visually rounded down
