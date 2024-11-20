@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.io.File;
@@ -19,7 +20,7 @@ import java.io.IOException;
 
 
 
-class main implements KeyListener {
+class App implements KeyListener {
 
     int n = 32;
 
@@ -38,7 +39,7 @@ class main implements KeyListener {
 
 
     public static void main(String[] args) {
-        main x = new main();
+        App x = new App();
         
         x.panel = new DrawingPanel(896, 896);
         x.g = x.panel.getGraphics();
@@ -74,13 +75,28 @@ class main implements KeyListener {
 
 
     int frames = 0; // General time telling device, however, System.currentTimeMilliseconds() would be the most succinct.
+    boolean start_search = true;
+    Map.Entry<Integer, Integer> start, end, current;
+
+    boolean pathneeded = true;
+
+    int enemyx = 0;
+    int enemyy = 0;
+
+    ArrayList<Map.Entry<Integer, Integer>> finishedPath = new ArrayList<>();
+
+    Random random = new Random();
 
 
     public void draw(DrawingPanel panel, Graphics g) throws InterruptedException { // perhaps the name is misleading but this is our main game loop
 
         while (true) {
 
-        
+            if (pathneeded == true)
+            {
+                finishedPath = maze.getPath(random.nextInt(n),random.nextInt(n));
+                pathneeded = false;
+            }
 
             boolean gameRunning = true;
 
@@ -91,6 +107,23 @@ class main implements KeyListener {
 
             g.setColor(Color.black);
             //g.fillRect(0, 0, width, height);\
+
+            if (start_search && finishedPath.size() > 0) {
+                // Call weightedManhattenSearch to get the next position
+                System.out.println(finishedPath);
+
+
+                Map.Entry<Integer, Integer> point = finishedPath.remove(0);  // Removes and returns the first element
+
+                maze.grid[enemyy][enemyx] &= ~maze.aiPresent;
+                
+                enemyx = point.getKey();
+                enemyy = point.getValue();
+
+                maze.grid[enemyy][enemyx] |= maze.aiPresent;
+    
+                Thread.sleep(100);
+            }
             
 
             Graphics2D g2d = (Graphics2D) g;
@@ -108,20 +141,20 @@ class main implements KeyListener {
                         g2d.setColor(new Color(158, 206, 106));
                     } else if ((cell & maze.END) != 0) {
                         g2d.setColor(new Color(122, 162, 247));
-                    } else if ((cell & maze.VISITED) != 0) {
+                    } else if ((cell & maze.VISITED) != 0 && (cell & maze.DEAD) == 0 && (cell & maze.PATHD) == 0) {
                         g2d.setColor(new Color(15, 15, 20));
                     } else if ((cell & maze.PATH) != 0) {
                         g2d.setColor(new Color(169, 177, 214, 200));
-                    } else if ((cell & maze.DEAD) != 0 && (cell & maze.START) == 0) {
+                    } else if ((cell & maze.DEAD) != 0) {
                         g2d.setColor(new Color(15, 15, 20));
                     } else if ((cell & maze.PATHM) != 0) {
                         g2d.setColor(new Color(140, 67, 81, 200));
                     } else if ((cell & maze.PATHD) != 0) {
-                        g2d.setColor(new Color(140, 67, 81, 200));
+                        g2d.setColor(new Color(15, 15, 20));
                     } else if ((cell & maze.DEADM) != 0 && (cell & maze.START) == 0) {
-                        g2d.setColor(new Color(15, 15, 20));
+                        g2d.setColor(new Color(15, 40, 20));
                     } else if ((cell & maze.DEADD) != 0 && (cell & maze.START) == 0) {
-                        g2d.setColor(new Color(15, 15, 20));
+                        g2d.setColor(new Color(15, 90, 20));
                     } else if ((cell & maze.FRONTIER) != 0) {
                         g2d.setColor(new Color(247, 118, 142));
                     }
@@ -156,6 +189,13 @@ class main implements KeyListener {
                     }
                     if (y == 0) {
                         g2d.fillRect(xPos, yPos, blockSize, 6);
+                    }
+
+
+                    if ((cell & maze.aiPresent) != 0)
+                    {
+                        g2d.setColor(new Color(247, 20, 20));
+                        g2d.fillRect(xPos+4, yPos+4, blockSize-8, blockSize-8);
                     }
                 }
             }
