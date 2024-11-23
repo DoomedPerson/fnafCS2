@@ -51,16 +51,16 @@ public class MazeGenerator {
     public List<Map.Entry<Integer, Integer>> unvisited_neighborsDumb(int x, int y) {
         List<Map.Entry<Integer, Integer>> result = new ArrayList<>();
 
-        if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0) {
+        if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0 && (grid[y][x-1] & E) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x - 1, y)); // Left
         }
-        if (x + 1 < width && (grid[y][x + 1] & PATHD) == 0 && (grid[y][x] & E) == 0) {
+        if (x + 1 < width && (grid[y][x + 1] & PATHD) == 0 && (grid[y][x] & E) == 0 && (grid[y][x+1] & W) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x + 1, y)); // Right
         }
-        if (y > 0 && (grid[y - 1][x] & PATHD) == 0 && (grid[y][x] & N) == 0) {
+        if (y > 0 && (grid[y - 1][x] & PATHD) == 0 && (grid[y][x] & N) == 0 && (grid[y-1][x] & S) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x, y - 1)); // Up
         }
-        if (y + 1 < height && (grid[y + 1][x] & PATHD) == 0 && (grid[y][x] & S) == 0) {
+        if (y + 1 < height && (grid[y + 1][x] & PATHD) == 0 && (grid[y][x] & S) == 0 && (grid[y+1][x] & N) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x, y + 1)); // Down
         }
 
@@ -77,10 +77,26 @@ public class MazeGenerator {
 
             // Get neighbors of the current position
             List<Map.Entry<Integer, Integer>> neighbors = unvisited_neighborsDumb(x, y);
+            
+            int b = 0; // manhattan distance implemenation
+            int dist = 32134; // integer greatest than max distance
+            int i = 0;
+            for (Map.Entry<Integer, Integer> n : neighbors) {
+                int tempdist = Math.abs(n.getKey() - width/2) + Math.abs(n.getValue() - height/2);
+                if (tempdist < dist)
+                {
+                    dist = tempdist;
+                    b = i;
+                }
+
+                
+                i++;
+
+            }
 
             if (!neighbors.isEmpty()) {
                 // Continue DFS: pick a random neighbor and move there
-                Map.Entry<Integer, Integer> next = neighbors.get(rand.nextInt(neighbors.size()));
+                Map.Entry<Integer, Integer> next = neighbors.get(b);//rand.nextInt(neighbors.size()));
                 int nx = next.getKey();
                 int ny = next.getValue();
 
@@ -137,6 +153,42 @@ public class MazeGenerator {
     }
 
     public void generateMaze(int[][] grid) {
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                grid[j][i] |= VISITED;
+            }
+        }
+
+        for (int i = 0; i < width; i++)
+        {
+            grid[0][i] |= N;
+            grid[height-1][i] |= S;
+
+            grid[i][0] |= W;
+            grid[i][width-1] |= E;
+        }
+
+        grid[1][1] |= N;
+        grid[1][1] |= W;
+        grid[2][1] |= W;
+
+        grid[width/2-1][width/2-1] |= N;
+        grid[width/2-1][width/2-1] |= W;
+        grid[width/2+1][width/2+1] |= E;
+        grid[width/2+1][width/2+1] |= S;
+        grid[width/2-1][width/2+1] |= E;
+        grid[width/2-1][width/2+1] |= N;
+
+        grid[width/2+1][width/2-1] |= W;
+        grid[width/2+1][width/2-1] |= S;
+
+        grid[width/2-1][width/2] |= N;
+        grid[width/2+1][width/2] |= S;
+
+        /*
         while (!mazeComplete) {
             creationSteps++;
 
@@ -206,7 +258,7 @@ public class MazeGenerator {
                 grid[width/2][height/2] |= END;
                 mazeComplete = true;
             }
-        }
+        } */
     }
 
     public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y)
