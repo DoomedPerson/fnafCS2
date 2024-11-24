@@ -1,6 +1,8 @@
 import java.util.*;
 
 public class MazeGenerator {
+    main reference;
+
     int N = 0x1; // 0001
     int S = 0x2; // 0010
     int E = 0x4; // 0100
@@ -20,6 +22,12 @@ public class MazeGenerator {
     int PATHD = 0x2000; // 1000000000
     int DEADD = 0x4000; // 1000000000
     int aiPresent = 0x8000; // 1000000000
+    int DOOR = 0x20000; // 1000000000
+
+    int door1x = 15;
+    int door1y = 16;
+    int door2x = 17;
+    int door2y = 16;
 
     int last = 1;
     
@@ -51,16 +59,16 @@ public class MazeGenerator {
     public List<Map.Entry<Integer, Integer>> unvisited_neighborsDumb(int x, int y) {
         List<Map.Entry<Integer, Integer>> result = new ArrayList<>();
 
-        if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0 && (grid[y][x-1] & E) == 0) {
+        if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0 && (grid[y][x-1] & E) == 0 && (grid[y][x] & DOOR) == 0 ) {
             result.add(new AbstractMap.SimpleEntry<>(x - 1, y)); // Left
         }
-        if (x + 1 < width && (grid[y][x + 1] & PATHD) == 0 && (grid[y][x] & E) == 0 && (grid[y][x+1] & W) == 0) {
+        if (x + 1 < width && (grid[y][x + 1] & PATHD) == 0 && (grid[y][x] & E) == 0 && (grid[y][x+1] & W) == 0 && (grid[y][x] & DOOR) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x + 1, y)); // Right
         }
-        if (y > 0 && (grid[y - 1][x] & PATHD) == 0 && (grid[y][x] & N) == 0 && (grid[y-1][x] & S) == 0) {
+        if (y > 0 && (grid[y - 1][x] & PATHD) == 0 && (grid[y][x] & N) == 0 && (grid[y-1][x] & S) == 0 && (grid[y][x] & DOOR) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x, y - 1)); // Up
         }
-        if (y + 1 < height && (grid[y + 1][x] & PATHD) == 0 && (grid[y][x] & S) == 0 && (grid[y+1][x] & N) == 0) {
+        if (y + 1 < height && (grid[y + 1][x] & PATHD) == 0 && (grid[y][x] & S) == 0 && (grid[y+1][x] & N ) == 0 && (grid[y][x] & DOOR) == 0) {
             result.add(new AbstractMap.SimpleEntry<>(x, y + 1)); // Down
         }
 
@@ -68,7 +76,7 @@ public class MazeGenerator {
     }
     public Map.Entry<Integer, Integer> depthFirstSearch(int x, int y) {
         // Start DFS from the starting point
-        lastPathD.add(start);
+        lastPathD.add(Map.entry(x, y));
 
         while (!lastPathD.isEmpty()) {
             Map.Entry<Integer, Integer> current = lastPathD.get(lastPathD.size() - 1);
@@ -259,6 +267,33 @@ public class MazeGenerator {
                 mazeComplete = true;
             }
         } */
+    }
+
+
+    public void closeDoor(int door, int c)
+    {
+
+        frontier = new ArrayList<>();
+        lastMove = new ArrayList<>();
+        lastPath = new ArrayList<>();
+        lastPathD = new ArrayList<>();
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                grid[i][j] &= ~PATHD;
+            }
+        }
+        reference.pathneeded = true;
+        if (door == 1)
+        {
+            grid[door1y][door1x] ^= (DOOR);
+        }
+        if (door == 2)
+        {
+            grid[door2y][door2x] ^= (DOOR);
+        }
     }
 
     public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y)
