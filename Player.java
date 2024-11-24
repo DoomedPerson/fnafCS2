@@ -4,6 +4,9 @@ import java.awt.event.KeyListener;
 
 
 public class Player implements KeyListener {
+    // Importing grid
+    public MazeGenerator maze;
+
     // This is to keep track of what doors are closed
     public static int door1closed = 0;
     public static int door2closed = 0;
@@ -28,17 +31,21 @@ public class Player implements KeyListener {
     public void keyPressed(KeyEvent e) {
     int keyCode = e.getKeyCode(); // reminds me of Lua
         //the key being pressed
+    System.out.println("hey");
     switch (keyCode) {
         case KeyEvent.VK_W:
         if (door1closed == 0) {
             door1closed = 1;
+            
         } else {
             door1closed = 0;
+            
         }
         break;
         case KeyEvent.VK_S:
         if (door3closed == 0) {
             door3closed = 1;
+            
         } else {
             door3closed = 0;
         }
@@ -46,15 +53,19 @@ public class Player implements KeyListener {
         case KeyEvent.VK_A:
         if (door2closed == 0) {
             door2closed = 1;
+            maze.closeDoor(1, 1);
         } else {
             door2closed = 0;
+            maze.closeDoor(1, 0);
         }
         break;
         case KeyEvent.VK_D:
         if (door4closed == 0) {
             door4closed = 1;
+            maze.closeDoor(2, 1);
         } else {
             door4closed = 0;
+            maze.closeDoor(2, 0);
         }
         break;
         case KeyEvent.VK_SPACE:
@@ -73,18 +84,20 @@ public void keyTyped(KeyEvent e) {
 // did it really wants me to override this function so.
 }
 
-    public static void main(String[] args) {
+    public Player(MazeGenerator importmaze) {
+        maze = importmaze;
+
         // The player will be able to press buttons to toggle the door closing
         // Every second the usage will be subtracting from your actual power, visually rounded down
 
         // Cams should have an effect on your power if they are implemented, adding 1 extra usage
 
         // Power drainage should be kept at a pretty average level, not "hard" but not "basically closed all the doors for most of the night"
-        Player player = new Player();
-
+        
+        System.out.println("key listening");
         int il = 0;
         for (int i = 0; il < 0; il++) {
-            player.keyPressed(null);
+            keyPressed(null);
 // Idk what to use the for loop dor yet
 
             // Only the player should affect power usage unless a mechanic that drains power that is not controlled by the
