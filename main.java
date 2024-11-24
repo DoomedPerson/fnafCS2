@@ -20,11 +20,13 @@ import java.io.IOException;
 
 
 
-class App implements KeyListener {
+class main implements KeyListener {
 
-    int n = 32;
+    static int n = 32;
 
-    MazeGenerator maze = new MazeGenerator(n, n);
+    static MazeGenerator maze = new MazeGenerator(n, n);
+    
+    
 
 
 
@@ -39,14 +41,17 @@ class App implements KeyListener {
 
 
     public static void main(String[] args) {
-        App x = new App();
+        main x = new main();
         
         x.panel = new DrawingPanel(896, 896);
         x.g = x.panel.getGraphics();
+        
 
         
 
        try {
+           maze.reference = x;
+           x.panel.addKeyListener(new Player(maze));
            x.draw(x.panel, x.g);
        } catch (InterruptedException e) { // incase either titleScreen or draw get interrupted when hanging their thread up.
            e.printStackTrace();
@@ -88,13 +93,14 @@ class App implements KeyListener {
     Random random = new Random();
 
 
+
     public void draw(DrawingPanel panel, Graphics g) throws InterruptedException { // perhaps the name is misleading but this is our main game loop
 
         while (true) {
 
             if (pathneeded == true)
             {
-                finishedPath = maze.getPath(random.nextInt(n),random.nextInt(n));
+                finishedPath = maze.getPath(enemyx,enemyy);
                 pathneeded = false;
             }
 
@@ -110,7 +116,6 @@ class App implements KeyListener {
 
             if (start_search && finishedPath.size() > 0) {
                 // Call weightedManhattenSearch to get the next position
-                System.out.println(finishedPath);
 
 
                 Map.Entry<Integer, Integer> point = finishedPath.remove(0);  // Removes and returns the first element
@@ -176,6 +181,11 @@ class App implements KeyListener {
                     if ((cell & maze.W) != 0) {
                         g2d.fillRect(xPos - 2, yPos, 4, blockSize);
                     }
+                    if ((cell & maze.DOOR) != 0) {
+                        g2d.setColor(Color.white);
+                        g2d.fillRect(xPos, yPos, blockSize, blockSize);
+                    }
+                    g2d.setColor(new Color(31, 32, 43));
                     
                     // Draw borders for the maze
                     if (x == width - 1) {
@@ -211,4 +221,6 @@ class App implements KeyListener {
 
 
     }
+
+
 }
