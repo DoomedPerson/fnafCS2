@@ -20,7 +20,7 @@ import java.io.IOException;
 
 
 
-class main implements KeyListener {
+class App implements KeyListener {
 
     static int n = 32;
 
@@ -35,13 +35,15 @@ class main implements KeyListener {
     long gameStartingMS = 0;
 
     boolean gameClose = false;
+    boolean inMenu = true;
+
 
     DrawingPanel panel;
     Graphics g;
 
 
     public static void main(String[] args) {
-        main x = new main();
+        App x = new App();
         
         x.panel = new DrawingPanel(896, 896);
         x.g = x.panel.getGraphics();
@@ -51,6 +53,7 @@ class main implements KeyListener {
 
        try {
            maze.reference = x;
+           x.drawMenu(x.panel, x.g);
            x.panel.addKeyListener(new Player(maze));
            x.draw(x.panel, x.g);
        } catch (InterruptedException e) { // incase either titleScreen or draw get interrupted when hanging their thread up.
@@ -92,11 +95,59 @@ class main implements KeyListener {
 
     Random random = new Random();
 
+    public void checkCoordinatesForMenu(int x, int y)
+    {
+        if (x >= 360 && x <= 560 && y >= 600 && y <= 680)
+        {
+            inMenu = false;
+        }
 
+        if (x >= 360 && x <= 560 && y >= 700 && y <= 780)
+        {
+            inMenu = false;
+            gameClose = true;
+        }
+    }
+
+
+    public void drawMenu(DrawingPanel panel, Graphics g) {
+
+        panel.onClick( (x, y) -> checkCoordinatesForMenu(x, y));
+
+            //background color
+            g.setColor(Color.BLACK);
+            g.fillRect(0,0,896,896);
+
+
+        while (inMenu)
+        {
+
+            // Title (probably change this)
+            g.setFont(new Font("DialogInput", Font.BOLD, 50));
+            g.setColor(Color.WHITE);
+            g.drawString("Five Nights Town", 240, 100);
+
+            // start
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("DialogInput", Font.PLAIN, 50));
+            g.setColor(Color.WHITE);
+            g.drawRect(360, 600, 200, 80);  // Button border
+            g.drawString("Start", 380, 660);
+
+            // exit
+            g.setColor(Color.WHITE);
+            g.drawRect(360, 700, 200, 80);  // Button border
+            g.drawString("Exit", 396, 760);
+
+            // halt the code here!!
+
+        }
+
+    }
 
     public void draw(DrawingPanel panel, Graphics g) throws InterruptedException { // perhaps the name is misleading but this is our main game loop
 
-        while (true) {
+        while (gameClose == false) {
 
             if (pathneeded == true)
             {
