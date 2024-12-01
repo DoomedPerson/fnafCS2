@@ -1,7 +1,8 @@
 import java.util.*;
+import java.util.Map.Entry;
 
 public class MazeGenerator {
-    main reference;
+    App reference;
 
     int N = 0x1; // 0001
     int S = 0x2; // 0010
@@ -23,6 +24,9 @@ public class MazeGenerator {
     int DEADD = 0x4000; // 1000000000
     int aiPresent = 0x8000; // 1000000000
     int DOOR = 0x20000; // 1000000000
+    int LIGHT = 0x40000; // 10000000000
+
+    int tClosedDoors = 0;
 
     int door1x = 15;
     int door1y = 16;
@@ -56,7 +60,7 @@ public class MazeGenerator {
 
 
 
-    public List<Map.Entry<Integer, Integer>> unvisited_neighborsDumb(int x, int y) {
+    public ArrayList<Map.Entry<Integer, Integer>> unvisited_neighborsDumb(int x, int y) {
         List<Map.Entry<Integer, Integer>> result = new ArrayList<>();
 
         if (x > 0 && (grid[y][x - 1] & PATHD) == 0 && (grid[y][x] & W) == 0 && (grid[y][x-1] & E) == 0 && (grid[y][x] & DOOR) == 0 ) {
@@ -72,9 +76,9 @@ public class MazeGenerator {
             result.add(new AbstractMap.SimpleEntry<>(x, y + 1)); // Down
         }
 
-        return result;
+        return (ArrayList<Entry<Integer, Integer>>) result;
     }
-    public Map.Entry<Integer, Integer> depthFirstSearch(int x, int y) {
+    public Map.Entry<Integer, Integer> depthFirstSearch(int x, int y, int targetx, int targety) {
         // Start DFS from the starting point
         lastPathD.add(Map.entry(x, y));
 
@@ -90,7 +94,7 @@ public class MazeGenerator {
             int dist = 32134; // integer greatest than max distance
             int i = 0;
             for (Map.Entry<Integer, Integer> n : neighbors) {
-                int tempdist = Math.abs(n.getKey() - width/2) + Math.abs(n.getValue() - height/2);
+                int tempdist = Math.abs(n.getKey() - targetx) + Math.abs(n.getValue() - targety);
                 if (tempdist < dist)
                 {
                     dist = tempdist;
@@ -115,17 +119,23 @@ public class MazeGenerator {
                 lastPathD.add(next);
 
                 // If we reached the finish, store the path and return the finish
-                if (next.equals(Map.entry(width/2,height/2))) {
+                if (next.equals(Map.entry(targetx,targety))) {
                     // Copy the current path into finishedPath
                     finishedPath = new ArrayList<>(lastPathD);
                     return next; // Finish found, return the last position
                 }
-            } else {
+
+
+            } else if (lastPathD.size() > 1) {
                 // No unvisited neighbors, backtrack
                 lastPathD.remove(lastPathD.size() - 1); // Pop the stack
                 grid[y][x] |= DEAD;  // Mark the current cell as dead
             }
         }
+
+
+        // find a path to nowhere,
+
 
         return null; // If no path found
     }
@@ -179,9 +189,92 @@ public class MazeGenerator {
             grid[i][width-1] |= E;
         }
 
+
         grid[1][1] |= N;
         grid[1][1] |= W;
         grid[2][1] |= W;
+
+        grid[1][2] |= N;
+        grid[1][3] |= N;
+        grid[1][4] |= N;
+        grid[1][1] |= N;
+        grid[1][1] |= W;
+        grid[2][1] |= W;
+
+        grid[width/2-2][width/2-1] |= N;
+        grid[width/2-2][width/2-2] |= W;
+        grid[width/2-1][width/2-2] |= W;
+        grid[width/2-2][width/2-2] |= N;
+        grid[width/2-2][width/2] |= N;
+        grid[width/2-2][width/2+1] |= N;
+        grid[width/2-2][width/2+2] |= N;
+        grid[width/2-1][width/2+2] |= E;
+        grid[width/2-2][width/2+2] |= E;
+
+        grid[width/2-2][width/2+2] |= LIGHT;
+        grid[30][5] |= LIGHT;
+        
+        grid[width/2+2][width/2-1] |= S;
+        grid[width/2+2][width/2-2] |= W;
+        grid[width/2+1][width/2-2] |= W;
+        grid[width/2+2][width/2-2] |= S;
+        grid[width/2+2][width/2] |= S;
+        grid[width/2+2][width/2+1] |= S;
+        grid[width/2+2][width/2+2] |= S;
+        grid[width/2+1][width/2+2] |= E;
+        grid[width/2+2][width/2+2] |= E;
+
+
+        grid[width/2-2][width/2-3] |= S;
+        grid[width/2+2][width/2-3] |= N;
+        grid[width/2-2][width/2+3] |= S;
+        grid[width/2+2][width/2+3] |= N;
+
+        grid[width/2-1][width/2+4] |= E;
+        grid[width/2+1][width/2+4] |= E;
+        grid[width/2-2][width/2+4] |= E;
+        grid[width/2+2][width/2+4] |= E;
+        grid[width/2][width/2+4] |= E;
+
+        grid[width/2-4][width/2+4] |= N;
+        grid[width/2-4][width/2+3] |= N;
+        grid[width/2-4][width/2+2] |= N;
+        grid[width/2-4][width/2+1] |= N;
+        grid[width/2-4][width/2] |= N;
+        grid[width/2-4][width/2-4] |= N;
+        grid[width/2-4][width/2-3] |= N;
+        grid[width/2-4][width/2-2] |= N;
+        grid[width/2-4][width/2-1] |= N;
+
+        grid[width/2-3][width/2] |= E;
+        grid[width/2-4][width/2] |= W;
+
+        grid[width/2+3][width/2] |= E;
+        grid[width/2+4][width/2] |= W;
+
+        grid[width/2+4][width/2+4] |= S;
+        grid[width/2+4][width/2+3] |= S;
+        grid[width/2+4][width/2+2] |= S;
+        grid[width/2+4][width/2+1] |= S;
+        grid[width/2+4][width/2] |= S;
+        grid[width/2+4][width/2-4] |= S;
+        grid[width/2+4][width/2-3] |= S;
+        grid[width/2+4][width/2-2] |= S;
+        grid[width/2+4][width/2-1] |= S;
+
+        grid[width/2-1][width/2-4] |= W;
+        grid[width/2+1][width/2-4] |= W;
+        grid[width/2-2][width/2-4] |= W;
+        grid[width/2+2][width/2-4] |= W;
+        grid[width/2][width/2-4] |= W;
+
+
+        grid[width/2+1][width/2-1] |= W;
+        grid[width/2+1][width/2-1] |= S;
+
+        grid[width/2-1][width/2] |= N;
+        grid[width/2+1][width/2] |= S;
+
 
         grid[width/2-1][width/2-1] |= N;
         grid[width/2-1][width/2-1] |= W;
@@ -270,8 +363,9 @@ public class MazeGenerator {
     }
 
 
-    public void closeDoor(int door, int c)
+    public void closeDoor(int door, int c, Player p, int closedDoorsTotal)
     {
+        tClosedDoors = closedDoorsTotal;
 
         frontier = new ArrayList<>();
         lastMove = new ArrayList<>();
@@ -294,20 +388,45 @@ public class MazeGenerator {
         {
             grid[door2y][door2x] ^= (DOOR);
         }
+
+
     }
 
-    public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y)
+    public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y, int targetx, int targety)
     {
+        if (tClosedDoors == 2)
+        {
+            targetx = rand.nextInt(width);
+            targety = rand.nextInt(height);
+
+            while (targetx > width/2-2 && targetx < width/2 + 2)
+            {
+                targetx = rand.nextInt(width);
+            }
+
+            while (targety > height/2-2 && targety < height/2 + 2)
+            {
+                targety = rand.nextInt(height);
+            }
+
+        }
         boolean searching = true;
         while (searching == true) {
-            current = depthFirstSearch(x, y);
+            current = depthFirstSearch(x, y, targetx, targety);
 
 
 
         
                     // Check if we reached the end
-            if (checkEnd(current)) {
+            if (current != null && checkEnd(current, targetx, targety)) {
                 searching = false;  // Stop the search
+            } else if (current == null)
+            {
+                // meandering around....
+                System.out.println("Failure");
+                //return getPath(x, y, rand.nextInt(width), rand.nextInt(height)); thought this was faulty but it was just some other part of my code, anyway im using a different, less efficient method now but whatever its got better logic checks!
+
+
             }
         }
 
@@ -315,9 +434,9 @@ public class MazeGenerator {
 
     }
 
-    public boolean checkEnd(Map.Entry<Integer,Integer> curr)
+    public boolean checkEnd(Map.Entry<Integer,Integer> curr, int targetx, int targety)
     {
-        return (curr.getKey() == width/2 && curr.getValue() == height/2);
+        return (curr.getKey() == targetx && curr.getValue() == targety);
     }
 
     private void mark(int x, int y, int[][] grid, int last) {
