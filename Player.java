@@ -8,64 +8,69 @@ public class Player implements KeyListener {
     public MazeGenerator maze;
 
     // This is to keep track of what doors are closed
-    public static int door1closed = 0;
-    public static int door2closed = 0;
-    public static int door3closed = 0;
-    public static int door4closed = 0;
+    public int door1closed = 0;
+    public int door2closed = 0;
+    public int door3closed = 0;
+    public int door4closed = 0;
+
+    public char currentLetter = '.';
+    public boolean isPressed = false;
 
     // This keeps track of the power, if it is zero, normal gameplay stops, and you will enter a power out scene
-    public static double actPower = 100.0;
+    public double actPower = 100.0;
 
     // This is the power that is displayed to the player. It should be rounded down to the nearest ones place
     // so the player will usually have more power than they think they have
-    public static double disPower = 100;
+    public double disPower = 100;
 
     // this is related to the power usage that will be used to decrease the power
-    public static void powerDeduction() {
+    public void powerDeduction() {
         // this is the function that controls the power you have left
-        actPower -= (door1closed + door2closed + door3closed + door4closed) / 4;
+        actPower -= (door1closed + door2closed + door3closed + door4closed) / 4.0 / 4.0;
         disPower = (actPower / 1);
     }
 // Handles key presses
     @Override
     public void keyPressed(KeyEvent e) {
     int keyCode = e.getKeyCode(); // reminds me of Lua
+
+    currentLetter = e.getKeyChar();
+    isPressed = true;
         //the key being pressed
-    System.out.println("hey");
     switch (keyCode) {
         case KeyEvent.VK_W:
-        if (door1closed == 0) {
-            door1closed = 1;
+        if (this.door1closed == 0) {
+            this.door1closed = 1;
             
         } else {
-            door1closed = 0;
+            this.door1closed = 0;
             
         }
         break;
         case KeyEvent.VK_S:
-        if (door3closed == 0) {
-            door3closed = 1;
+        if (this.door3closed == 0) {
+            this.door3closed = 1;
             
         } else {
-            door3closed = 0;
+            this.door3closed = 0;
         }
         break;
         case KeyEvent.VK_A:
-        if (door2closed == 0) {
-            door2closed = 1;
-            maze.closeDoor(1, 1);
+        if (this.door2closed == 0) {
+            this.door2closed = 1;
+            maze.closeDoor(1, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         } else {
-            door2closed = 0;
-            maze.closeDoor(1, 0);
+            this.door2closed = 0;
+            maze.closeDoor(1, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_D:
-        if (door4closed == 0) {
-            door4closed = 1;
-            maze.closeDoor(2, 1);
+        if (this.door4closed == 0) {
+            this.door4closed = 1;
+            maze.closeDoor(2, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         } else {
-            door4closed = 0;
-            maze.closeDoor(2, 0);
+            this.door4closed = 0;
+            maze.closeDoor(2, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_SPACE:
@@ -76,6 +81,7 @@ public class Player implements KeyListener {
 // Not used (for now)
 public void keyReleased(KeyEvent e) {
     // Can I have $5
+    isPressed = false;
 }
 
 // Not used for now
@@ -85,7 +91,7 @@ public void keyTyped(KeyEvent e) {
 }
 
     public Player(MazeGenerator importmaze) {
-        maze = importmaze;
+        this.maze = importmaze;
 
         // The player will be able to press buttons to toggle the door closing
         // Every second the usage will be subtracting from your actual power, visually rounded down
@@ -95,15 +101,6 @@ public void keyTyped(KeyEvent e) {
         // Power drainage should be kept at a pretty average level, not "hard" but not "basically closed all the doors for most of the night"
         
         System.out.println("key listening");
-        int il = 0;
-        for (int i = 0; il < 0; il++) {
-            keyPressed(null);
-// Idk what to use the for loop dor yet
 
-            // Only the player should affect power usage unless a mechanic that drains power that is not controlled by the
-            // Player is implemented (Which is highly unlikely given time constraints)
-
-        }
-        powerDeduction();
     }
 }
