@@ -99,6 +99,8 @@ class main implements KeyListener {
 
     boolean pathneeded = true;
 
+    
+
     int enemyx = 0;
     int enemyy = 0;
 
@@ -410,6 +412,11 @@ class main implements KeyListener {
                 e.printStackTrace();
             }
         }
+
+    }
+
+    public void spawnEnemy()
+    {
 
     }
 
