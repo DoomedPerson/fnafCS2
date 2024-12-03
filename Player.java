@@ -41,18 +41,21 @@ public class Player implements KeyListener {
         case KeyEvent.VK_W:
         if (this.door1closed == 0) {
             this.door1closed = 1;
+            maze.closeDoor(4, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
             
         } else {
             this.door1closed = 0;
-            
+            maze.closeDoor(4, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_S:
         if (this.door3closed == 0) {
             this.door3closed = 1;
+            maze.closeDoor(3, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
             
         } else {
             this.door3closed = 0;
+            maze.closeDoor(3, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_A:
