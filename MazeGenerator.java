@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class MazeGenerator {
-    App reference;
+    main reference;
 
     int N = 0x1; // 0001
     int S = 0x2; // 0010
@@ -28,10 +28,14 @@ public class MazeGenerator {
 
     int tClosedDoors = 0;
 
-    int door1x = 15;
+    int door1x = 14;
     int door1y = 16;
-    int door2x = 17;
+    int door2x = 18;
     int door2y = 16;
+    int door3x = 16;
+    int door3y = 18;
+    int door4x = 16;
+    int door4y = 14;
 
     int last = 1;
     
@@ -205,20 +209,20 @@ public class MazeGenerator {
         grid[width/2-2][width/2-2] |= W;
         grid[width/2-1][width/2-2] |= W;
         grid[width/2-2][width/2-2] |= N;
-        grid[width/2-2][width/2] |= N;
+        grid[width/2-3][width/2] |= N;
         grid[width/2-2][width/2+1] |= N;
         grid[width/2-2][width/2+2] |= N;
         grid[width/2-1][width/2+2] |= E;
         grid[width/2-2][width/2+2] |= E;
 
-        grid[width/2-2][width/2+2] |= LIGHT;
-        grid[30][5] |= LIGHT;
+        //grid[width/2-2][width/2+2] |= LIGHT;
+        //grid[30][5] |= LIGHT;
         
         grid[width/2+2][width/2-1] |= S;
         grid[width/2+2][width/2-2] |= W;
         grid[width/2+1][width/2-2] |= W;
         grid[width/2+2][width/2-2] |= S;
-        grid[width/2+2][width/2] |= S;
+        grid[width/2+3][width/2] |= S;
         grid[width/2+2][width/2+1] |= S;
         grid[width/2+2][width/2+2] |= S;
         grid[width/2+1][width/2+2] |= E;
@@ -249,8 +253,8 @@ public class MazeGenerator {
         grid[width/2-3][width/2] |= E;
         grid[width/2-4][width/2] |= W;
 
-        grid[width/2+3][width/2] |= E;
-        grid[width/2+4][width/2] |= W;
+        grid[width/2+3][width/2] |= W;
+        grid[width/2+4][width/2] |= E;
 
         grid[width/2+4][width/2+4] |= S;
         grid[width/2+4][width/2+3] |= S;
@@ -277,8 +281,8 @@ public class MazeGenerator {
 
 
         grid[width/2-1][width/2-1] |= N;
-        grid[width/2-1][width/2-1] |= W;
-        grid[width/2+1][width/2+1] |= E;
+        grid[width/2][width/2-1] |= W;
+        grid[width/2][width/2+1] |= E;
         grid[width/2+1][width/2+1] |= S;
         grid[width/2-1][width/2+1] |= E;
         grid[width/2-1][width/2+1] |= N;
@@ -379,7 +383,7 @@ public class MazeGenerator {
                 grid[i][j] &= ~PATHD;
             }
         }
-        reference.pathneeded = true;
+
         if (door == 1)
         {
             grid[door1y][door1x] ^= (DOOR);
@@ -388,23 +392,34 @@ public class MazeGenerator {
         {
             grid[door2y][door2x] ^= (DOOR);
         }
+        if (door == 3)
+        {
+            grid[door3y][door3x] ^= (DOOR);
+        }
+        if (door == 4)
+        {
+            grid[door4y][door4x] ^= (DOOR);
+        }
+        reference.pathneeded = true;
+
 
 
     }
 
     public ArrayList<Map.Entry<Integer, Integer>> getPath(int x, int y, int targetx, int targety)
     {
-        if (tClosedDoors == 2)
+        if (tClosedDoors == 4)
         {
+            System.out.println(tClosedDoors);
             targetx = rand.nextInt(width);
             targety = rand.nextInt(height);
 
-            while (targetx > width/2-2 && targetx < width/2 + 2)
+            while (targetx > width/2-4 && targetx < width/2 + 4)
             {
                 targetx = rand.nextInt(width);
             }
 
-            while (targety > height/2-2 && targety < height/2 + 2)
+            while (targety > height/2-4 && targety < height/2 + 4)
             {
                 targety = rand.nextInt(height);
             }
