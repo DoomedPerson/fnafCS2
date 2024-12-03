@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class MazeGenerator {
-    App reference;
+    main reference;
 
     int N = 0x1; // 0001
     int S = 0x2; // 0010
