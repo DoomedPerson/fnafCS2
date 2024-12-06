@@ -13,6 +13,8 @@ public class Player implements KeyListener {
     public int door3closed = 0;
     public int door4closed = 0;
 
+    public int blowouts = 5;
+
     public char currentLetter = '.';
     public boolean isPressed = false;
 
@@ -26,8 +28,21 @@ public class Player implements KeyListener {
     // this is related to the power usage that will be used to decrease the power
     public void powerDeduction() {
         // this is the function that controls the power you have left
-        actPower -= (door1closed + door2closed + door3closed + door4closed) / 4.0 / 4.0;
+        actPower -= (door1closed + door2closed + door3closed + door4closed) / 4.0 / 16.0;
         disPower = (actPower / 1);
+
+        if (actPower <= 0)
+        {
+            actPower = 0;
+            this.door1closed = 0;
+            this.door2closed = 0;
+            this.door3closed = 0;
+            this.door4closed = 0;
+            maze.closeDoor(4, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
+            maze.closeDoor(1, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
+            maze.closeDoor(2, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
+            maze.closeDoor(3, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
+        }
     }
 // Handles key presses
     @Override
@@ -41,18 +56,21 @@ public class Player implements KeyListener {
         case KeyEvent.VK_W:
         if (this.door1closed == 0) {
             this.door1closed = 1;
+            maze.closeDoor(4, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
             
         } else {
             this.door1closed = 0;
-            
+            maze.closeDoor(4, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_S:
         if (this.door3closed == 0) {
             this.door3closed = 1;
+            maze.closeDoor(3, 1, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
             
         } else {
             this.door3closed = 0;
+            maze.closeDoor(3, 0, this, this.door1closed + this.door2closed + this.door3closed + this.door4closed);
         }
         break;
         case KeyEvent.VK_A:
@@ -74,6 +92,16 @@ public class Player implements KeyListener {
         }
         break;
         case KeyEvent.VK_SPACE:
+            if (blowouts > 0)
+            { 
+                try {
+                    maze.blowOut();
+                } catch (InterruptedException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                blowouts -= 1;
+            }
             break;
     }
 }
