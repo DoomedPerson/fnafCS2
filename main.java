@@ -60,6 +60,10 @@ class main implements KeyListener {
        try {
            maze.reference = x;
            x.drawMenu(x.panel, x.g);
+           x.enemyxs.add(x.enemyx);
+           x.enemyys.add(x.enemyy);
+           x.enemyStunned.add(false);
+           x.finishedPaths.add(x.finishedPath);
            Player p = new Player(maze);
            player = p;
            x.panel.addKeyListener(p);
@@ -99,12 +103,25 @@ class main implements KeyListener {
 
     boolean pathneeded = true;
 
+    ArrayList<ArrayList<Map.Entry<Integer, Integer>>> finishedPaths = new ArrayList<>();
+    ArrayList<Boolean> enemyStunned = new ArrayList<>();
+
+
+    ArrayList<Integer> enemyxs = new ArrayList<>();
+    ArrayList<Integer> enemyys = new ArrayList<>();
+    
     int enemyx = 0;
     int enemyy = 0;
+
+    int currentT = 0;
+    
+
 
     int blockSize;
 
     ArrayList<Map.Entry<Integer, Integer>> finishedPath = new ArrayList<>();
+
+    
 
     Random random = new Random();
 
@@ -359,6 +376,7 @@ class main implements KeyListener {
                         double Score = Double.parseDouble(words[1]);
                         names.add(Name);
                         scores.add(Score);
+                        
                     }
                     sc.close();
 
@@ -392,12 +410,11 @@ class main implements KeyListener {
                         g.drawString(names.get(i).toUpperCase() + ": " + scores.get(i), x, 160+50*(i));
                         Thread.sleep(80); 
                     }
-                    g.setColor(new Color(160, 160, 80));
                     g.setFont(new Font("SanSerif", Font.BOLD, 30)); 
 
                     metrics = g.getFontMetrics();
-                    x = (panel.getWidth() - metrics.stringWidth("Press space to close the game.")) / 2;
-                    g.drawString("Press space to close the game.", x, 500);
+                    //x = (panel.getWidth() - metrics.stringWidth("Press space to close the game.")) / 2;
+                    //g.drawString("Press space to close the game.", x, 500);
                     gameClose = true;
                     while (gameClose == true)
                     {
@@ -411,6 +428,14 @@ class main implements KeyListener {
             }
         }
 
+    }
+
+    public void spawnEnemy(int x, int y)
+    {
+        enemyxs.add(x);
+        enemyys.add(y);
+        enemyStunned.add(false);
+        finishedPaths.add(maze.getPath(x, y, maze.width/2, maze.height/2));
     }
 
 
@@ -450,60 +475,192 @@ class main implements KeyListener {
     }
 
     public void draw(DrawingPanel panel, Graphics g) throws InterruptedException { // perhaps the name is misleading but this is our main game loop
-        GameTimer timer = new GameTimer(10);
+        GameTimer timer = new GameTimer(60);
         timer.start();
+
+        long enemyMillisecondCount = System.currentTimeMillis();
+        long currentLightTimer = System.currentTimeMillis();
+        boolean lightcounter = false;
+        int width  = panel.getWidth();
+        int height = panel.getHeight();
 
         while (gameClose == false) {
 
             if (pathneeded == true)
             {
-                finishedPath = maze.getPath(enemyx,enemyy,maze.width/2,maze.height/2);
+                int i = 0;
+                for (int x : enemyxs)
+                {
+                    finishedPaths.set(i, maze.getPath(enemyxs.get(i), enemyys.get(i), maze.width/2, maze.height/2));
+                    i++;
+                }
                 pathneeded = false;
             }
 
             boolean gameRunning = true;
 
-            int width  = panel.getWidth();
-            int height = panel.getHeight();
+            
+            if ((maze.grid[maze.width/2][maze.height/2] & maze.LIGHT) != 0 && lightcounter == false)
+            {
+                lightcounter = true;
+                currentLightTimer = System.currentTimeMillis();
+            }
+
+            if (lightcounter == true && System.currentTimeMillis() - currentLightTimer > 260)
+            {
+                lightcounter = false;
+                int LIGHT = maze.LIGHT;
+
+                maze.grid[maze.width/2][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2-3] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2-3] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2-3] &= ~LIGHT;
+                maze.grid[maze.width/2][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2] &= ~LIGHT;
+        
+        
+                maze.grid[maze.width/2+2][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2+2][maze.width/2-3] &= ~LIGHT;
+        
+                maze.grid[maze.width/2+3][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2+3][maze.width/2-3] &= ~LIGHT;
+        
+                maze.grid[maze.width/2-3][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2-3][maze.width/2-3] &= ~LIGHT;
+        
+        
+        
+        
+                maze.grid[maze.width/2-2][maze.width/2] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2+3] &= ~LIGHT;
+                maze.grid[maze.width/2-2][maze.width/2-3] &= ~LIGHT;
+        
+                maze.grid[maze.width/2+1][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2+1][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2+1] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2-1] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2+2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2-2] &= ~LIGHT;
+                maze.grid[maze.width/2-1][maze.width/2] &= ~LIGHT;
+            }
+
+
 
             int blockSize = height/n;
 
             g.setColor(Color.black);
             //g.fillRect(0, 0, width, height);\
-
-            if (start_search && finishedPath.size() > 0) {
-                // Call weightedManhattenSearch to get the next position
-
-
-                Map.Entry<Integer, Integer> point = finishedPath.remove(0);  // Removes and returns the first element
-
-                maze.grid[enemyy][enemyx] &= ~maze.aiPresent;
-                
-                enemyx = point.getKey();
-                enemyy = point.getValue();
-
-                maze.grid[enemyy][enemyx] |= maze.aiPresent;
-    
-                Thread.sleep(100);
-            }
-            else if (finishedPath.size() == 0)
+            int i = 0;
+            if (System.currentTimeMillis() - enemyMillisecondCount > 75)
             {
-                ArrayList<Map.Entry<Integer, Integer>> neighbors = maze.unvisited_neighborsDumb(enemyx,enemyy);
-        
-    
-                if (!neighbors.isEmpty()) {
-                    Map.Entry<Integer, Integer> next = neighbors.get(random.nextInt(neighbors.size()));
-                    maze.grid[enemyy][enemyx] &= ~maze.aiPresent;
-                
-                    enemyx = next.getKey();
-                    enemyy = next.getValue();
-    
-                    maze.grid[enemyy][enemyx] |= maze.aiPresent;
-        
-                    Thread.sleep(100);
-                }
-    
+                for (int x : enemyxs)
+                {
+                    enemyx = enemyxs.get(i);
+                    enemyy = enemyys.get(i);
+                    finishedPath = finishedPaths.get(i);
+
+                    if (start_search && finishedPath.size() > 0) {
+                        // Call weightedManhattenSearch to get the next position
+
+
+                        Map.Entry<Integer, Integer> point = finishedPath.remove(0);  // Removes and returns the first element
+
+                        maze.grid[enemyy][enemyx] &= ~maze.aiPresent;
+                        
+                        enemyx = point.getKey();
+                        enemyy = point.getValue();
+
+                        enemyxs.set(i, enemyx);
+                        enemyys.set(i, enemyy);
+
+                        maze.grid[enemyy][enemyx] |= maze.aiPresent;
+
+                        if ((maze.grid[enemyy][enemyx] & maze.LIGHT) != 0)
+                        {
+                            // disrupt
+
+                            enemyStunned.set(i, true);
+
+                            int disruptx = random.nextInt(maze.width/2) + 8;
+                            int disrupty = random.nextInt(maze.height/2) + 8;
+
+                            while ((disruptx < 8 || disruptx > 24) || (disruptx > 12 && disruptx < 16 ))
+                            {
+                                disruptx = random.nextInt(maze.width/2) + 8;
+                            }
+
+                            while (disrupty < 8 || disrupty > 24 || (disrupty > 12 && disrupty < 16 ))
+                            {
+                                disrupty = random.nextInt(maze.height/2) + 8;
+                            }
+
+                            finishedPaths.set(i, maze.getPath(enemyx, enemyy, disruptx, disrupty));
+                        }
             
+                    }
+                    else if (finishedPath.size() == 0)
+                    {
+                        enemyStunned.set(i, false);
+                        finishedPaths.set(i, maze.getPath(enemyx, enemyy, maze.width/2, maze.height/2));
+                        /*meandering, this works alright but i think in the context of the lightflash this is bad.
+                        ArrayList<Map.Entry<Integer, Integer>> neighbors = maze.unvisited_neighborsDumb(enemyx,enemyy);
+                
+            
+                        if (!neighbors.isEmpty()) {
+                            Map.Entry<Integer, Integer> next = neighbors.get(random.nextInt(neighbors.size()));
+                            maze.grid[enemyy][enemyx] &= ~maze.aiPresent;
+                        
+                            enemyx = next.getKey();
+                            enemyy = next.getValue();
+
+                            enemyxs.set(i, enemyx);
+                            enemyys.set(i, enemyy);
+            
+                            maze.grid[enemyy][enemyx] |= maze.aiPresent;
+                
+                        }
+                        */
+                    
+                    }
+                    i++;
+
+                }
+                enemyMillisecondCount = System.currentTimeMillis();
             }
             
 
@@ -593,9 +750,39 @@ class main implements KeyListener {
                     }
                 }
             }
+
+            g2d.setColor(Color.WHITE);
+
+            g2d.drawRect(-2+width-200, -2+height-170, 4+20*5, 4+60);
+            g2d.drawRect(-2+width-200+4+20*5, -2+height-170+20, 10, 20);
+
+            g2d.setColor(Color.GREEN);
+
+
+
+            g2d.fillRect(width-200, height-170, 20*player.blowouts, 60);
+
             g2d.setColor(Color.WHITE);
             g2d.drawString(Double.toString(player.disPower), width-200, height-40);
-            g2d.drawString(Integer.toString(((12 + (90 - timer.getSecondsRemaining()) / 15) % 12) == 0 ? 12 : ((12 + (90 - timer.getSecondsRemaining()) / 15) % 12)) + "am", 20, height-40);
+            g2d.drawString(Integer.toString(((12 + (60 - timer.getSecondsRemaining()) / 10) % 12) == 0 ? 12 : ((12 + (60 - timer.getSecondsRemaining()) / 10) % 12)) + "am", 20, height-40);
+            //
+        
+            if (currentT + 1 <= ((((60 - timer.getSecondsRemaining()) / 10) % 6)))
+            {
+                currentT = (((60 - timer.getSecondsRemaining()) / 10) % 6);
+
+                int rand = random.nextInt(4);
+
+                if (rand == 0)
+                    spawnEnemy(0, 0);
+                if (rand == 1)
+                    spawnEnemy(maze.width-1, 0);
+                if (rand == 2)
+                    spawnEnemy(0, maze.height-1);
+                if (rand == 3)
+                    spawnEnemy(maze.width-1, maze.height-1);
+                
+            }
 
             // Draw boundary rectangle around the maze
             g2d.setColor(new Color(31, 32, 43));
@@ -603,34 +790,44 @@ class main implements KeyListener {
             g2d.fillRect(width - blockSize / 4, 0, blockSize / 4, height + 200); // Right border
             g2d.fillRect(0, height + 200 - blockSize / 4, width, blockSize / 4); // Bottom border
 
-            if (enemyx == maze.width/2 && enemyy == maze.height/2 && timer.getSecondsRemaining() < 5)
+            i = 0;
+            for (int x : enemyxs)
             {
-                // we could jumpscare
-                
-                gameLost = true;
-                for (double i = 0; i < 1; i+=0.01)
+                enemyx = enemyxs.get(i);
+                enemyy = enemyys.get(i);
+                finishedPath = finishedPaths.get(i);
+
+                if (enemyx == maze.width/2 && enemyy == maze.height/2 && timer.getSecondsRemaining() < 87 && enemyStunned.get(i) == false)
                 {
-                    g2d.setColor(new Color(0,0,0, (int)(70*i)));
-                    g2d.fillRect(0, 0, width, height); // Left border
-                    Thread.sleep(20);
+                    // we could jumpscare
+                    
+                    gameLost = true;
+                    for (double j = 0; j < 1; j+=0.01)
+                    {
+                        g2d.setColor(new Color(0,0,0, (int)(70*j)));
+                        g2d.fillRect(0, 0, width, height); // Left border
+                        Thread.sleep(20);
+                    }
+                    return;
                 }
-                return;
-            }
-            if (timer.getSecondsRemaining() <= 0)
-            {
-                for (double i = 0; i < 1; i+=0.01)
+                if (timer.getSecondsRemaining() <= 0)
                 {
-                    g2d.setColor(new Color(0,0,0, (int)(70*i)));
-                    g2d.fillRect(0, 0, width, height); // Left border
-                    Thread.sleep(10);
+                    for (double j = 0; j < 1; j+=0.01)
+                    {
+                        g2d.setColor(new Color(0,0,0, (int)(70*j)));
+                        g2d.fillRect(0, 0, width, height); // Left border
+                        Thread.sleep(10);
+                    }
+                    gameLost = false;
+                    return;
                 }
-                gameLost = false;
-                return;
+                i++;
             }
 
             player.powerDeduction();
 
-            Thread.sleep(16);
+            
+            Thread.sleep(32);
         }    
 
 
